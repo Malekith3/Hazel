@@ -2,4 +2,8 @@
 .vs/
 bin-init/
 #files
+<<<<<<< HEAD
 *.user
+=======
+*.user
+>>>>>>> 63301925a34ba5e5c91da95a670595eb6662cc69
