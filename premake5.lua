@@ -1,5 +1,7 @@
  workspace "Hazel"
  architecture "x64"
+ startproject "Sandbox"
+
 
  configurations
  {
@@ -18,12 +20,18 @@
  targetdir ("bin/" .. outputdir .. "/%{prj.name}")
  objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+ pchheader "hzpch.h"
+ pchsource "Hazel/src/hzpch.cpp"
+
  files
  {
   "%{prj.name}/src/**.h",
   "%{prj.name}/src/**.cpp"
  }
-
+ 	defines
+	{
+		"_CRT_SECURE_NO_WARNINGS"
+	}
  includedirs
  {
   "%{prj.name}/src",
