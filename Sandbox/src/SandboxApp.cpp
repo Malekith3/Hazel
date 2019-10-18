@@ -1,4 +1,5 @@
-#include<Hazel.h>
+#include <Hazel.h>
+
 class ExampleLayer : public Hazel::Layer
 {
 public:
@@ -18,24 +19,24 @@ public:
 	}
 
 };
-class Sandbox : public Hazel::application
+
+class Sandbox : public Hazel::Application
 {
 public:
-	Sandbox() 
+	Sandbox()
 	{
 		PushLayer(new ExampleLayer());
 		PushOverlay(new Hazel::ImGuiLayer());
-
-	}
-	~Sandbox() {
-
 	}
 
-private:
+	~Sandbox()
+	{
+
+	}
 
 };
 
-Hazel::application* Hazel::CreateApplication()
+Hazel::Application* Hazel::CreateApplication()
 {
 	return new Sandbox();
 }

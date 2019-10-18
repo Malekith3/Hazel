@@ -1,69 +1,74 @@
-#include"hzpch.h"
-#include "application.h"
-#include <glad/glad.h>
+#include "hzpch.h"
+#include "Application.h"
+
 #include "Hazel/Log.h"
-namespace Hazel{
-   #define BIND_EVENT_FN(x) std::bind(&application::x,this ,std::placeholders::_1)
-	application* application::s_Instance = nullptr;
 
-application::application()
-{
-	HZ_CORE_ASSERT(!s_Instance, "Application already exists!");
-	s_Instance = this;
-	m_Window =std::unique_ptr<Window>( Window::Create());
-	m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+#include <glad/glad.h>
+#include "Input.h"
 
-}
+namespace Hazel {
 
+#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
-application::~application()
-{
-}
-void application::PushLayer(Layer* layer) 
-{
-	m_LayerStack.PushLayer(layer);
-	layer->OnAttach();
-}
-void application::PushOverlay(Layer* layer) 
-{
-	m_LayerStack.PushOverlay(layer);
-	layer->OnAttach();
-}
-void application:: OnEvent(Event& e) 
-{
-	EventDispatcher dispatcher(e);
-	dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowsClosed));
-	HZ_CORE_TRACE("{0}",e);
-	for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();) 
+	Application* Application::s_Instance = nullptr;
+
+	Application::Application() 
 	{
-		(*--it)->OnEvent(e);
-		if (e.Handled)
-			break;
+		HZ_CORE_ASSERT(!s_Instance, "Application already exists!");
+		s_Instance = this;
 
+		m_Window = std::unique_ptr<Window>(Window::Create());
+		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 	}
-}
 
-  void application::Run()
-  {
-	
-	  while (m_Running)
-	  {
-		  glClearColor(0, 0, 1, 1);
-		  glClear(GL_COLOR_BUFFER_BIT);
-		  for (Layer* layer: m_LayerStack)
-		  {
-			  layer->OnUpdate();
-		  }
+	Application::~Application()
+	{
+	}
 
-		  m_Window->OnUpdate();
+	void Application::PushLayer(Layer* layer)
+	{
+		m_LayerStack.PushLayer(layer);
+		layer->OnAttach();
+	}
 
-	  }
-	  
+	void Application::PushOverlay(Layer* layer)
+	{
+		m_LayerStack.PushOverlay(layer);
+		layer->OnAttach();
+	}
 
-  }
-bool application::OnWindowsClosed(WindowCloseEvent& e) 
-{
-	m_Running = false;
-	return true;
-}
+	void Application::OnEvent(Event& e)
+	{
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+
+		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
+		{
+			(*--it)->OnEvent(e);
+			if (e.Handled)
+				break;
+		}
+	}
+
+	void Application::Run()
+	{
+		while (m_Running)
+		{
+			glClearColor(1, 0, 1, 1);
+			glClear(GL_COLOR_BUFFER_BIT);
+
+			for (Layer* layer : m_LayerStack)
+				layer->OnUpdate();
+			auto [x, y] = Input::GetMousePosition();
+			HZ_CORE_TRACE("{0},{1}", x, y);
+			m_Window->OnUpdate();
+		}
+	}
+
+	bool Application::OnWindowClose(WindowCloseEvent& e)
+	{
+		m_Running = false;
+		return true;
+	}
+
 }
